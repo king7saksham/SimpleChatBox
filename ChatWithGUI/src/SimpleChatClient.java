@@ -14,6 +14,7 @@ public class SimpleChatClient {
     BufferedReader reader;
     PrintWriter writer;
     Socket sock;
+    String name;
 
     public static void main(String[] args) {
         SimpleChatClient client = new SimpleChatClient();
@@ -45,11 +46,13 @@ public class SimpleChatClient {
         frame.setSize(400,500);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setVisible(true);
+
+        new NameBox().start();
     }
 
     public void setUpNetworking(){
         try {
-            sock = new Socket("127.0.0.1",2002);
+            sock = new Socket("192.168.1.12",2002);
             InputStreamReader streamReader = new InputStreamReader(sock.getInputStream());
             reader = new BufferedReader(streamReader);
             writer = new PrintWriter(sock.getOutputStream());
@@ -63,7 +66,7 @@ public class SimpleChatClient {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                writer.println(outgoing.getText());
+                writer.println(name+": "+outgoing.getText());
                 writer.flush();
             }catch (Exception ex){
                 ex.printStackTrace();
@@ -87,6 +90,32 @@ public class SimpleChatClient {
             }catch (Exception ex){
                 ex.printStackTrace();
             }
+        }
+    }
+
+    public class NameBox implements ActionListener {
+        JButton enter;
+        JFrame frame;
+        JTextField nameBar;
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            name = nameBar.getText();
+            frame.dispose();
+        }
+
+        public void start(){
+            frame = new JFrame("Name");
+            JPanel panel = new JPanel();
+            JLabel label = new JLabel("Please Enter Your Name");
+            nameBar = new JTextField(20);
+            enter = new JButton("Enter");
+            enter.addActionListener(this);
+            panel.add(label);
+            panel.add(nameBar);
+            panel.add(enter);
+            frame.getContentPane().add(panel);
+            frame.setSize(300,200);
+            frame.setVisible(true);
         }
     }
 }
