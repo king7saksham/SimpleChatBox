@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="charClient">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/out/production/ChatWithGUI/charClient.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
