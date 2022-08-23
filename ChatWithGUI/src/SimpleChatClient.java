@@ -9,12 +9,14 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class SimpleChatClient {
+    JFrame theFrame;
     JTextArea incoming;
     JTextField outgoing;
     BufferedReader reader;
     PrintWriter writer;
     Socket sock;
     String name;
+    String ip;
 
     public static void main(String[] args) {
         SimpleChatClient client = new SimpleChatClient();
@@ -22,7 +24,7 @@ public class SimpleChatClient {
     }
 
     public void go(){
-        JFrame frame = new JFrame("Simple Chat Box");
+        theFrame = new JFrame("Simple Chat Box");
         JPanel panel = new JPanel();
         incoming = new JTextArea(15,30);
         incoming.setLineWrap(true);
@@ -37,26 +39,25 @@ public class SimpleChatClient {
         panel.add(qScroller);
         panel.add(outgoing);
         panel.add(sendButton);
-        frame.getContentPane().add(BorderLayout.CENTER,panel);
-        setUpNetworking();
+        theFrame.getContentPane().add(BorderLayout.CENTER,panel);
+        nameAndIp();
 
-        Thread readerThread = new Thread(new IncomingReader());
-        readerThread.start();
-
-        frame.setSize(400,500);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-
-        new NameBox().start();
+        theFrame.getRootPane().setDefaultButton(sendButton);
+        theFrame.setSize(400,350);
+        theFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        theFrame.setVisible(true);
     }
 
     public void setUpNetworking(){
         try {
-            sock = new Socket("192.168.1.12",2002);
+            sock = new Socket(ip,2002);
             InputStreamReader streamReader = new InputStreamReader(sock.getInputStream());
             reader = new BufferedReader(streamReader);
             writer = new PrintWriter(sock.getOutputStream());
             System.out.println("Network Established");
+
+            Thread readerThread = new Thread(new IncomingReader());
+            readerThread.start();
         }catch (IOException ex){
             ex.printStackTrace();
         }
@@ -82,7 +83,6 @@ public class SimpleChatClient {
         public void run() {
             String message;
             try {
-
                 while ((message = reader.readLine()) != null){
                     System.out.println("read "+message);
                     incoming.append(message+"\n");
@@ -93,29 +93,31 @@ public class SimpleChatClient {
         }
     }
 
-    public class NameBox implements ActionListener {
-        JButton enter;
-        JFrame frame;
-        JTextField nameBar;
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            name = nameBar.getText();
-            frame.dispose();
-        }
+    public void nameAndIp() {
+        Object[] option = {"Enter"};
 
-        public void start(){
-            frame = new JFrame("Name");
-            JPanel panel = new JPanel();
-            JLabel label = new JLabel("Please Enter Your Name");
-            nameBar = new JTextField(20);
-            enter = new JButton("Enter");
-            enter.addActionListener(this);
-            panel.add(label);
-            panel.add(nameBar);
-            panel.add(enter);
-            frame.getContentPane().add(panel);
-            frame.setSize(300,200);
-            frame.setVisible(true);
-        }
+        JTextField nameField = new JTextField(20);
+        JTextField ipField = new JTextField(20);
+
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Please Enter your Name: "));
+        panel.add(nameField);
+        panel.add(new JLabel("Please Enter the Server IP Address: "));
+        panel.add(ipField);
+
+        panel.setLayout(new GridLayout(2, 2));
+
+        JOptionPane.showOptionDialog(theFrame,
+                panel,
+                "User Name and Server IP",
+                JOptionPane.YES_OPTION,
+                JOptionPane.WARNING_MESSAGE,
+                null,
+                option,
+                option[0]);
+        name = nameField.getText();
+        ip = ipField.getText();
+
+        setUpNetworking();
     }
 }

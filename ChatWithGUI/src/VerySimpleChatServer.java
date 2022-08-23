@@ -1,13 +1,14 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 public class VerySimpleChatServer {
-    ArrayList clientOutputStreams;
+    ArrayList<Writer> clientOutputStreams;
 
     public class ClientHandler implements Runnable {
         BufferedReader reader;
@@ -39,7 +40,7 @@ public class VerySimpleChatServer {
     }
 
     public void tellEveryone(String message) {
-        Iterator it = clientOutputStreams.iterator();
+        Iterator<Writer> it = clientOutputStreams.iterator();
 
         while (it.hasNext()){
             try {
@@ -53,13 +54,13 @@ public class VerySimpleChatServer {
     }
 
     public void go(){
-        clientOutputStreams = new ArrayList();
+        clientOutputStreams = new ArrayList<Writer>();
         try {
             ServerSocket serverSocket = new ServerSocket(2002);
 
             while (true){
                 Socket clientSocket = serverSocket.accept();
-                PrintWriter writer = new PrintWriter(clientSocket.getOutputStream());
+                Writer writer = new PrintWriter(clientSocket.getOutputStream());
                 clientOutputStreams.add(writer);
 
                 Thread thread = new Thread(new ClientHandler(clientSocket));
